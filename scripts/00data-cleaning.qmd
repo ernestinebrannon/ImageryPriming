@@ -9,7 +9,7 @@ library(tidyverse) #manipulating data
 library(here) #managing directories
 library(ggplot2) #making graphs
 
-all_data <- list.files(here("data", "BR"), pattern = "\\.csv$", full.names = TRUE) %>%
+all_data <- list.files(here("data","raw", "BR"), pattern = "\\.csv$", full.names = TRUE) %>%
   map_dfr(function(file) {
     read_csv(file) %>%
       filter(!is.na(label)) %>% #only real trials, no staircase trials
@@ -78,4 +78,6 @@ all_data<- inner_join(all_data,vviq_data, by = "participant")
 
 all_data$VVIQ<-as.numeric(all_data$VVIQ)
 all_data$VVIQ<-as.numeric(all_data$VVIQ2)
+
+write.csv(all_data,here("data","clean_data"))
 ```
