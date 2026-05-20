@@ -62,7 +62,7 @@ all_data<- all_data%>%
   ))
 
 #Get VVIQ and VVIQ2 Scores and combine with other data
-vviq_data<- read_csv("data/vviq.csv")
+vviq_data<- read_csv(here("data","vviq.csv")
 
 #vviq_data<- vviq_data[,20:54] 
 
