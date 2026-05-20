@@ -7,7 +7,6 @@ editor: visual
 ```{r setup}
 library(tidyverse) #manipulating data
 library(here) #managing directories
-library(ggplot2) #making graphs
 
 all_data <- list.files(here("data","raw-data", "BR"), pattern = "\\.csv$", full.names = TRUE) %>%
   map_dfr(function(file) {
