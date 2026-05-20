@@ -9,11 +9,11 @@ library(tidyverse) #manipulating data
 library(here) #managing directories
 library(ggplot2) #making graphs
 
-all_data <- list.files(here("data","raw", "BR"), pattern = "\\.csv$", full.names = TRUE) %>%
+all_data <- list.files(here("data","raw-data", "BR"), pattern = "\\.csv$", full.names = TRUE) %>%
   map_dfr(function(file) {
     read_csv(file) %>%
       filter(!is.na(label)) %>% #only real trials, no staircase trials
-      select(label, visualCue, probe_loc, probe_response, subj_response, vivid_response, participant)%>% 
+      select(label, visualCue, probe_loc, probe_response, subj_response, vivid_response, participant)%>% #selecting columns of interest
       mutate(
         source_file = basename(file),
         trial_type = case_when(
@@ -28,7 +28,7 @@ all_data <- list.files(here("data","raw", "BR"), pattern = "\\.csv$", full.names
       )
   })
 
-#Order subject responses
+#Order subjective responses
 all_data<-all_data %>% 
   mutate(subj_response = factor(subj_response, levels = c("allgreen","mostlygreen","evensplit","mostlyred","allred")))
 
@@ -62,20 +62,25 @@ all_data<- all_data%>%
   ))
 
 #Get VVIQ and VVIQ2 Scores and combine with other data
-vviq_data<- read_csv(here("data","vviq.csv"))
+vviq_data<- read_csv(here("data","raw-data","vviq.csv"))
 
-#vviq_data<- vviq_data[,20:54] 
 
 vviq_data<- vviq_data %>% rename("participant" = "QID78")%>% 
   rename("VVIQ2"= "SC0") %>%
   rename("VVIQ"= "SC1")
   
+#fix mislabeled participant id 
+vviq_data <- vviq_data %>% 
+  mutate(participant = recode(participant, "260404oj" = "260406oj"))
 
+#select columns of interest
 vviq_data<- vviq_data %>%
   select(participant,VVIQ2,VVIQ)
 
+#combine binocular rivalry data with vviq data
 all_data<- inner_join(all_data,vviq_data, by = "participant")
 
+#ensure that vviq scores are numeric
 all_data$VVIQ<-as.numeric(all_data$VVIQ)
 all_data$VVIQ<-as.numeric(all_data$VVIQ2)
 
