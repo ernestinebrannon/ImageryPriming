@@ -72,6 +72,10 @@ vviq_data<- vviq_data %>% rename("participant" = "QID78")%>%
 vviq_data <- vviq_data %>% 
   mutate(participant = recode(participant, "260404oj" = "260406oj"))
 
+#remove hf (incorrect controls)
+all_data<- all_data %>%
+  filter(participant !='050526hf')
+
 #select columns of interest
 vviq_data<- vviq_data %>%
   select(participant,VVIQ2,VVIQ)
