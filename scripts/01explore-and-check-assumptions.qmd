@@ -41,4 +41,9 @@ ggplot(all_data, aes(x=vivid_response))+
   facet_wrap(~participant)
 ```
 
+```{r}
+ggplot(all_data, aes(x=subj_response))+
+  geom_histogram(binwidth=1)+
+  facet_wrap(~participant)
+```
 
