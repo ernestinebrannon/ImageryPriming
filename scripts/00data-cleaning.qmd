@@ -96,9 +96,12 @@ $$ \%primed =\frac{ n_{RR}+ n_{GG} + 0.5*n_{RM}+0.5*n_{GM}}{n_{RR} + n_{GG} + 0.
 subj_priming_resp<- all_data %>% 
   group_by(participant) %>%
   count(mostlys_equal_all) %>% 
-  pivot_wider(names_from = mostlys_equal_all, values_from = n, values_fill = 0) %>% 
-  summarise(subj_prime = ((GG + RR + (0.5*GM) + (0.5*RM)))/((GG + RR + (0.5*GM) + (0.5*RM)+RG+GR)))
-  
+  pivot_wider(names_from = mostlys_equal_all, values_from = n, values_fill = 0)
+
+prime_scores_sub<- subj_priming_resp %>% 
+  summarise(subj_prime = ((GG + RR + (0.5*GM) + (0.5*RM)))/((GG + RR + (0.5*GM) + (0.5*RM)+RG+GR)), .groups = "drop")
+
+subj_priming_resp<- left_join(subj_priming_resp,prime_scores_sub, by= "participant")
   
 ```
 
@@ -120,4 +123,6 @@ accuracy_data<- all_data %>%
 #combining survey,accuracy,and subj priming score data
 between_subj<- inner_join(survey_data,accuracy_data,by = "participant")
 between_subj<- left_join(between_subj,subj_priming_resp, by = "participant")
+
+write_csv(between_subj,here("data","between_subj.csv"))
 ```
