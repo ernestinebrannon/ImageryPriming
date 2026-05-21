@@ -17,15 +17,16 @@ between_subj <- read_csv(here("data","between_subj.csv"), show_col_types = FALSE
 
 
 ```{r}
-ggplot(between_subj, aes(x= VVIQ))+
-  geom_histogram(binwidth=6)
+ggplot(between_subj, aes(x= participant, y=VVIQ))+
+  geom_col()
 ```
 
 
 ```{r}
-ggplot(between_subj, aes(x= VVIQ2))+
-  geom_histogram(binwidth=8)
+ggplot(between_subj, aes(x= participant, y=VVIQ2))+
+  geom_col()
 ```
+
 
 
 ```{r}
@@ -42,8 +43,11 @@ ggplot(all_data, aes(x=vivid_response))+
 ```
 
 ```{r}
-ggplot(all_data, aes(x=subj_response))+
-  geom_histogram(binwidth=1)+
+plot_data<- all_data%>%
+  count(participant, subj_response) %>%
+  mutate(prop= n/sum(n))
+ggplot(plot_data, aes(x=subj_response, prop))+
+  geom_col()+
   facet_wrap(~participant)
 ```
 
