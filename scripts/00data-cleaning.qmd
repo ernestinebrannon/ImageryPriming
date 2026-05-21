@@ -87,6 +87,8 @@ all_data<- inner_join(all_data,vviq_data, by = "participant")
 all_data$VVIQ<-as.numeric(all_data$VVIQ)
 all_data$VVIQ2<-as.numeric(all_data$VVIQ2)
 
+#make new column with just participant initials
+
 write_csv(all_data,here("data","clean_data.csv"))
 ```
 
