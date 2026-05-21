@@ -11,7 +11,8 @@ library(here)
 library(plotly)
 library(shiny)
 
-clean_data<-read_csv(here("data","clean_data.csv"))
+clean_data<-read_csv(here("data","clean_data.csv"),show_col_types = FALSE)
+between_subj<-read_csv(here("data","between_subj.csv"),show_col_types = FALSE)
 ```
 
 ```{r}

@@ -11,10 +11,11 @@ library(DataExplorer) #probably won't use, auto generates exploratory analysis
 library(gt) #for creating tables
 
 all_data<- read_csv(here("data","clean_data.csv"),show_col_types = FALSE)
-between_subj <- read_csv(here("data"),"between_subj.csv", show_col_types = FALSE)
+between_subj <- read_csv(here("data","between_subj.csv"), show_col_types = FALSE)
 ```
-```{r}
 
+```{r}
+summarise(all_data)
 ```
 
 
