@@ -11,12 +11,34 @@ library(DataExplorer) #probably won't use, auto generates exploratory analysis
 library(gt) #for creating tables
 
 all_data<- read_csv(here("data","clean_data.csv"),show_col_types = FALSE)
-between_subj <- read_csv(here("data"),"between_subj.csv", show_col_types = FALSE)
+between_subj <- read_csv(here("data","between_subj.csv"), show_col_types = FALSE)
 ```
+
+
+
 ```{r}
+ggplot(between_subj, aes(x= VVIQ))+
+  geom_histogram(binwidth=6)
+```
+
+
+```{r}
+ggplot(between_subj, aes(x= VVIQ2))+
+  geom_histogram(binwidth=8)
+```
+
+
+```{r}
+ggplot(between_subj, aes(x= avg_vividness))+
+  geom_histogram(binwidth=1)
 
 ```
 
 
+```{r}
+ggplot(all_data, aes(x=vivid_response))+
+  geom_histogram(binwidth=1)+
+  facet_wrap(~participant)
+```
 
 

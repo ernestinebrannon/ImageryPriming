@@ -12,6 +12,7 @@ library(plotly)
 library(shiny)
 
 clean_data<-read_csv(here("data","clean_data.csv"))
+between_subj<- read_csv(here("data","between_subj.csv"),show_col_types = FALSE)
 ```
 
 ```{r}
@@ -275,5 +276,4 @@ accuracy_plot <- ggplot(plot_data, aes(x = trial_type_clean, y = prop_correct)) 
 
 ggsave(here("results","accuracy_plot.png"),accuracy_plot)
 ```
-
 
