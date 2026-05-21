@@ -1,0 +1,112 @@
+---
+title: "03generate-plots"
+format: html
+---
+
+```{r}
+library(ggplot2)
+library(tidyverse)
+library(scales)
+library(here)
+clean_data<-read_csv(here("data","clean_data.csv"))
+```
+
+```{r}
+plot_data <- clean_data %>%
+  mutate(
+    trial_type_clean = case_when(
+      trial_type == "control" ~ "Control",
+      trial_type == "congruent" ~ "Probe = Imagined Color",
+      trial_type == "incongruent" ~ "Probe \u2260 Imagined Color",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(trial_type_clean)) %>%
+  group_by(participant, trial_type_clean) %>%
+  summarise(
+    prop_correct = mean(correct, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    trial_type_clean = factor(
+      trial_type_clean,
+      levels = c(
+        "Control",
+        "Probe = Imagined Color",
+        "Probe \u2260 Imagined Color"
+      )
+    )
+  )
+
+summary_data <- plot_data %>%
+  group_by(trial_type_clean) %>%
+  summarise(
+    mean_acc = mean(prop_correct, na.rm = TRUE),
+    se = sd(prop_correct, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+
+accuracy_plot <- ggplot(plot_data, aes(x = trial_type_clean, y = prop_correct)) +
+  
+  geom_line(aes(group = participant),
+            color = "gray75",
+            alpha = 0.3,
+            linewidth = 0.7) +
+  
+  geom_point(aes(group = participant),
+             color = "gray70",
+             alpha = 0.45,
+             size = 2) +
+  
+  geom_hline(yintercept = 0.5,
+             linetype = "dashed",
+             color = "gray45",
+             linewidth = 0.8) +
+  
+  geom_line(data = summary_data,
+            aes(y = mean_acc, group = 1),
+            color = "black",
+            linewidth = 2) +
+  
+  geom_errorbar(data = summary_data,
+                aes(
+                  y = mean_acc,
+                  ymin = mean_acc - se,
+                  ymax = mean_acc + se
+                ),
+                width = 0.12,
+                linewidth = 1) +
+  
+  geom_point(data = summary_data,
+             aes(y = mean_acc),
+             size = 4,
+             color = "black") +
+  
+  scale_y_continuous(
+    limits = c(0, 1),
+    breaks = c(0, 0.5, 1),
+    labels = c("0%", "50%", "100%")
+  ) +
+  
+  labs(
+    title = "Accuracy by Trial Type",
+    subtitle = "Accuracy is near ceiling across trial types",
+    x = NULL,
+    y = "Percent Correct"
+  ) +
+  
+  theme_minimal(base_size = 18) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    axis.text.x = element_text(size = 14, angle = 18, hjust = 1),
+    axis.text.y = element_text(size = 15),
+    axis.title.y = element_text(size = 18, face = "bold"),
+    plot.title = element_text(face = "bold", size = 24),
+    plot.subtitle = element_text(size = 15)
+  )
+
+accuracy_plot
+```
+
+
