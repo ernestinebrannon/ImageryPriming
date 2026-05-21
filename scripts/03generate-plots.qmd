@@ -3,15 +3,182 @@ title: "03generate-plots"
 format: html
 ---
 
-```{r}
+```{r set up}
 library(ggplot2)
 library(tidyverse)
 library(scales)
 library(here)
+library(plotly)
+library(shiny)
+
 clean_data<-read_csv(here("data","clean_data.csv"))
 ```
 
 ```{r}
+
+
+response_plot_data <- all_data %>%
+  mutate(
+    subj_response_clean = factor(
+      subj_response,
+      levels = c("allgreen", "mostlygreen", "evensplit", "mostlyred", "allred"),
+      labels = c("All\nGreen", "Mostly\nGreen", "Mixed", "Mostly\nRed", "All\nRed")
+    )
+  ) %>%
+  filter(!is.na(subj_response_clean))
+
+# 2. Define the User Interface (UI)
+ui <- fluidPage(
+  titlePanel("Subjective Color Responses"),
+  
+  sidebarLayout(
+    sidebarPanel(
+      # Dropdown to select "All Subjects" or a specific one
+      selectInput(
+        inputId = "subject_select",
+        label = "Choose Subject View:",
+        choices = c("All Subjects (Aggregated)", unique(as.character(response_plot_data$participant)))
+      )
+    ),
+    
+    mainPanel(
+      # Interactive plot output
+      plotlyOutput("color_plot", height = "600px")
+    )
+  )
+)
+
+# 3. Define the Server Logic
+server <- function(input, output, session) {
+  
+  output$color_plot <- renderPlotly({
+    
+    # Logic to filter and aggregate data based on user input
+    if (input$subject_select == "All Subjects (Aggregated)") {
+      
+      # Aggregate across ALL participants
+      plot_data <- response_plot_data %>%
+        count(subj_response_clean) %>%
+        mutate(prop = n / sum(n))
+      
+      # Build the base plot without facets
+      p <- ggplot(plot_data, aes(x = subj_response_clean, y = prop, fill = subj_response_clean)) +
+        geom_col(width = 0.65)
+      
+    } else {
+      
+      # Filter for just the single selected participant
+      plot_data <- response_plot_data %>%
+        filter(participant == input$subject_select) %>%
+        count(participant, subj_response_clean) %>%
+        mutate(prop = n / sum(n))
+      
+      # Build the plot with a facet for that participant
+      p <- ggplot(plot_data, aes(x = subj_response_clean, y = prop, fill = subj_response_clean)) +
+        geom_col(width = 0.65) +
+        facet_wrap(~ participant)
+    }
+    
+    # Apply all your original styling rules to the chosen plot
+    p <- p +
+      scale_x_discrete(expand = expansion(mult = 0.15)) +
+      scale_fill_manual(values = c(
+        "All\nGreen" = "#1b7837",
+        "Mostly\nGreen" = "#7fbf7b",
+        "Mixed" = "#d9d9d9",
+        "Mostly\nRed" = "#ef8a62",
+        "All\nRed" = "#b2182b"
+      )) +
+      scale_y_continuous(
+        labels = percent_format(),
+        limits = c(0, 1),
+        expand = expansion(mult = c(0, 0.08))
+      ) +
+      geom_hline(yintercept = 0, color = "gray50") +
+      labs(
+        title = "Subjective Color Responses",
+        x = "Subjective Color Response",
+        y = "Proportion of Trials"
+      ) +
+      theme_minimal(base_size = 14) +
+      theme(
+        panel.grid.minor = element_blank(),
+        panel.grid.major.x = element_blank(),
+        strip.text = element_text(face = "bold"),
+        axis.text.x = element_text(size = 13, angle = 15, hjust = 1, lineheight = 0.9),
+        panel.spacing = unit(1.2, "lines"),
+        legend.position = "none"
+      )
+    
+    # Convert the ggplot to an interactive plotly object
+    ggplotly(p)
+  })
+}
+
+# 4. Run the application 
+shinyApp(ui = ui, server = server)
+
+```
+
+```{r subj resp histogram}
+response_plot_data <- all_data %>%
+  mutate(
+    subj_response_clean = factor(
+      subj_response,
+      levels = c("allgreen", "mostlygreen", "evensplit", "mostlyred", "allred"),
+      labels = c("All\nGreen", "Mostly\nGreen", "Mixed", "Mostly\nRed", "All\nRed")
+    )
+  ) %>%
+  filter(!is.na(subj_response_clean)) %>%
+  count(participant, subj_response_clean) %>%
+  group_by(participant) %>%
+  mutate(prop = n / sum(n)) %>%
+  ungroup()
+
+ggplot(response_plot_data, aes(x = subj_response_clean, y = prop, fill = subj_response_clean)) +
+  
+  geom_col(width = 0.65) +
+  
+  facet_wrap(~ participant, nrow = 2) +
+  
+  scale_x_discrete(
+    expand = expansion(mult = 0.15)
+  ) +
+  
+  scale_fill_manual(values = c(
+    "All\nGreen" = "#1b7837",
+    "Mostly\nGreen" = "#7fbf7b",
+    "Mixed" = "#d9d9d9",
+    "Mostly\nRed" = "#ef8a62",
+    "All\nRed" = "#b2182b"
+  )) +
+  
+  scale_y_continuous(
+    labels = scales::percent_format(),
+    limits = c(0, 1),
+    expand = expansion(mult = c(0, 0.08))
+  ) +
+  
+  geom_hline(yintercept = 0, color = "gray50") +
+  
+  labs(
+    title = "Individual Differences in Subjective Color Responses",
+    x = "Subjective Color Response",
+    y = "Proportion of Trials"
+  ) +
+  
+  theme_minimal(base_size = 14) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    strip.text = element_text(face = "bold"),
+    axis.text.x = element_text(size = 13, angle = 15, hjust = 1, lineheight = 0.9),
+    panel.spacing = unit(1.2, "lines"),
+    legend.position = "none"
+  )
+```
+
+```{r probe accuracy plot}
 plot_data <- clean_data %>%
   mutate(
     trial_type_clean = case_when(

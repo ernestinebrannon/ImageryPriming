@@ -3,3 +3,20 @@ title: "01explore-and-check-assumptions"
 format: html
 ---
 
+```{r}
+library(ggplot2) #creating plots
+library(tidyverse) #data cleaning 
+library(here) #managing directories, points to Rproj as working directory
+library(DataExplorer) #probably won't use, auto generates exploratory analysis
+library(gt) #for creating tables
+
+all_data<- read_csv(here("data","clean_data.csv"),show_col_types = FALSE)
+between_subj <- read_csv(here("data"),"between_subj.csv", show_col_types = FALSE)
+```
+```{r}
+
+```
+
+
+
+

@@ -81,7 +81,42 @@ all_data<- inner_join(all_data,vviq_data, by = "participant")
 
 #ensure that vviq scores are numeric
 all_data$VVIQ<-as.numeric(all_data$VVIQ)
-all_data$VVIQ<-as.numeric(all_data$VVIQ2)
+all_data$VVIQ2<-as.numeric(all_data$VVIQ2)
 
-write.csv(all_data,here("data","clean_data.csv"))
+write_csv(all_data,here("data","clean_data.csv"))
+```
+
+#### Subjective priming score
+
+$$ \%primed =\frac{ n_{RR}+ n_{GG} + 0.5*n_{RM}+0.5*n_{GM}}{n_{RR} + n_{GG} + 0.5*n_{RM} +0.5*n_{GM}+n_{RG}+n_{GR}}$$
+
+```{r}
+#calculate the number each type of response-cue pairing for each subject 
+
+subj_priming_resp<- all_data %>% 
+  group_by(participant) %>%
+  count(mostlys_equal_all) %>% 
+  pivot_wider(names_from = mostlys_equal_all, values_from = n) %>% 
+  summarise( numberator = GG + RR)
+  
+  
+```
+
+```{r}
+## creates 
+survey_data <- all_data %>%
+  group_by(participant) %>% 
+  summarise(
+    VVIQ = mean(VVIQ, na.rm = TRUE),
+    VVIQ2 = mean(VVIQ2, na.rm = TRUE),
+    avg_vividness = mean(vivid_response, na.rm = TRUE), .groups = "drop")
+
+accuracy_data<- all_data %>% 
+    group_by(participant, trial_type) %>%
+  summarise(accuracy = mean(correct, na.rm = TRUE), .groups = "drop") %>%
+  pivot_wider(names_from = trial_type, values_from = accuracy) %>%
+  mutate(
+    congruence_effect = congruent - incongruent)
+
+between_subj<- inner_join(survey_data,accuracy_data,by = "participant")
 ```

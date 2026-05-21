@@ -1,0 +1,337 @@
+---
+title: "Exploratory Data Analysis"
+format: 
+  dashboard:
+    scrolling: true
+server: shiny
+---
+
+```{r setup}
+#| context: setup
+library(shiny)
+library(dplyr)
+library(ggplot2)
+library(plotly)
+library(scales)
+library(tidyverse)
+library(here)
+library(gt)
+
+# Load and prep data
+all_data <- read_csv(here("data", "clean_data.csv"))
+
+response_base_data <- all_data %>%
+  mutate(
+    subj_response_clean = factor(
+      subj_response,
+      levels = c("allgreen", "mostlygreen", "evensplit", "mostlyred", "allred"),
+      labels = c("All\nGreen", "Mostly\nGreen", "Mixed", "Mostly\nRed", "All\nRed")
+    )
+  ) %>%
+  filter(!is.na(subj_response_clean))
+
+all_participants <- sort(unique(as.character(response_base_data$participant)))
+```
+
+# Subjective Responses
+
+## Row
+
+### Sidebar {.sidebar}
+
+```{r menu}
+shiny::selectInput(
+  inputId = "subject_select",
+  label = "Select Subjects to Compare:",
+  # FIXED: Added the aggregated label string option directly into the choices pool
+  choices = c("Across Subjects (Aggregated)", all_participants),
+  selected = "Across Subjects (Aggregated)",
+  multiple = TRUE
+)
+
+shiny::actionButton("select_all", "Select All Subjects", class = "btn-block")
+shiny::actionButton("clear_all", "Clear All Selections", class = "btn-block")
+shiny::actionButton("across_subjects", "Across Subjects", class = "btn-block")
+```
+
+### Column: Interactive Participant Grid
+
+```{r colorplot}
+plotlyOutput("color_plot", height = "500px")
+```
+
+```{r choose server}
+#| context: server
+
+# Update when selection is made
+observeEvent(input$select_all, {
+  updateSelectInput(session, "subject_select", selected = all_participants)
+})
+
+observeEvent(input$clear_all, {
+  updateSelectInput(session, "subject_select", selected = character(0))
+})
+
+observeEvent(input$across_subjects, {
+  updateSelectInput(session, "subject_select", selected = "Across Subjects (Aggregated)")
+})
+
+# wrap everything in renderPlotly
+output$color_plot <- renderPlotly({
+  req(input$subject_select)
+  
+  if ("Across Subjects (Aggregated)" %in% input$subject_select) {
+    
+    # Calculate for across subject 
+    plot_data <- response_base_data %>%
+      count(subj_response_clean) %>%
+      mutate(prop = n / sum(n))
+    
+    # Across subject plot (no faceting)
+    p <- ggplot(plot_data, aes(x = subj_response_clean, y = prop, fill = subj_response_clean)) +
+      geom_col(width = 0.65)
+    
+  } else {
+    
+# Calculations for each subject selected
+    plot_data <- response_base_data %>%
+      filter(participant %in% input$subject_select) %>%
+      count(participant, subj_response_clean) %>%
+      group_by(participant) %>%
+      mutate(prop = n / sum(n)) %>%
+      ungroup()
+    
+# plot with facet option for displaying multiple subjects
+    p <- ggplot(plot_data, aes(x = subj_response_clean, y = prop, fill = subj_response_clean)) +
+      geom_col(width = 0.65) +
+      facet_wrap(~ participant, ncol = 3)
+  }
+  
+  # graph customization
+  p <- p +
+    scale_x_discrete(expand = expansion(mult = 0.15)) +
+    scale_fill_manual(values = c(
+      "All\nGreen" = "#1b7837", "Mostly\nGreen" = "#7fbf7b",
+      "Mixed" = "#d9d9d9", "Mostly\nRed" = "#ef8a62", "All\nRed" = "#b2182b"
+    )) +
+    scale_y_continuous(labels = percent_format(), limits = c(0, 1)) +
+    theme_minimal(base_size = 11) +
+    theme(
+      legend.position = "none", 
+      axis.text.x = element_text(angle = 30, hjust = 1),
+      strip.text = element_text(face = "bold")
+    )
+  
+  ggplotly(p)
+})
+```
+
+# Probe Accuracy
+
+## Row
+
+```{r accuracy plot}
+##prepare data
+accuracy_data <- all_data %>%
+  mutate(
+    trial_type_clean = case_when(
+      trial_type == "control" ~ "Control",
+      trial_type %in% c("congruent") ~ "Probe = Imagined Color",
+      trial_type == "incongruent" ~ "Probe \u2260 Imagined Color",
+      TRUE ~ NA_character_
+    )
+  ) %>%
+  filter(!is.na(trial_type_clean)) %>%
+  group_by(participant, trial_type_clean) %>%
+  summarise(
+    prop_correct = mean(correct, na.rm = TRUE),
+    .groups = "drop"
+  ) %>%
+  mutate(
+    trial_type_clean = factor(
+      trial_type_clean,
+      levels = c(
+        "Control",
+        "Probe = Imagined Color",
+        "Probe \u2260 Imagined Color"
+      )
+    )
+  )
+
+summary_data <- accuracy_data %>%
+  group_by(trial_type_clean) %>%
+  summarise(
+    mean_acc = mean(prop_correct, na.rm = TRUE),
+    se = sd(prop_correct, na.rm = TRUE) / sqrt(n()),
+    .groups = "drop"
+  )
+
+#### creates plot
+accuracy_plot <- ggplot(
+  accuracy_data, 
+  aes(
+    x = trial_type_clean, 
+    y = prop_correct,
+    ####uses tooltip to display participant id when hovering over data
+    text = paste("Participant ID:", participant, "<br>Accuracy:", scales::percent(prop_correct, accuracy = 0.1))
+  )
+) +
+  
+  # Individual Lines
+  geom_line(
+    aes(group = participant),
+    color = "gray70",
+    alpha = 0.45,
+    linewidth = 0.7
+  ) +
+  
+  # Individual Points
+  geom_point(
+    aes(group = participant),
+    color = "gray70",
+    alpha = 0.5,
+    size = 2.2
+  ) +
+  
+  #### add gray line to indicate at-chance level (50%)
+  geom_hline(
+    yintercept = 0.5,
+    linetype = "dashed",
+    color = "gray40",
+    linewidth = 1
+  ) +
+  
+  # --- Summary Layers (Must override text = NULL to avoid errors) ---
+  
+  # Summary Mean Line
+  geom_line(
+    data = summary_data,
+    aes(y = mean_acc, group = 1, text = NULL), 
+    color = "black",
+    linewidth = 1.5
+  ) +
+  
+  # Summary Error Bars
+  geom_errorbar(
+    data = summary_data,
+    aes(
+      y = mean_acc,
+      ymin = mean_acc - se,
+      ymax = mean_acc + se,
+      text = NULL
+    ),
+    width = 0.12,
+    linewidth = 1.1,
+    color = "black"
+  ) +
+  
+  # Summary Mean Points
+  geom_point(
+    data = summary_data,
+    aes(y = mean_acc, text = NULL),
+    size = 4
+  ) +
+  
+  # --- Rest of your original design and scales ---
+  scale_x_discrete(
+    labels = function(x) str_wrap(x, width = 12),
+    expand = expansion(mult = 0.2)
+  ) +
+  
+  scale_y_continuous(
+    limits = c(0, 1),
+    breaks = c(0, 0.5, 1),
+    labels = c("0%", "50%", "100%"),
+    expand = expansion(mult = c(0.02, 0.06))
+  ) +
+  
+  labs(
+    title = "Objective Measure: Probe Detection",
+    x = NULL,
+    y = "Percent Correct"
+  ) +
+  
+  theme_minimal(base_size = 18) +
+  theme(
+    panel.grid.minor = element_blank(),
+    panel.grid.major.x = element_blank(),
+    legend.position = "none",
+    axis.text.x = element_text(size = 16, angle = 0, hjust = 0.5, lineheight = 0.9),
+    axis.text.y = element_text(size = 15),
+    axis.title.y = element_text(size = 16, face = "bold"),
+    plot.title = element_text(face = "bold", size = 26)
+  )
+
+#makes plot interactive
+ggplotly(accuracy_plot, tooltip = "text")
+```
+
+## Row
+```{r }
+#make dataframe with accuracy for each subj
+subject_wide <- accuracy_data %>%
+#round percentages for readability
+  mutate(prop_correct = round(prop_correct, 3)) %>%
+#separate trial types into columns
+  pivot_wider(
+    names_from = trial_type_clean,
+    values_from = prop_correct
+  ) %>%
+  mutate(participant = as.character(participant))
+
+#calc average for across subjects
+across_subjects_row <- summary_data %>%
+  mutate(mean_acc = round(mean_acc, 3)) %>%
+  select(trial_type_clean, mean_acc) %>%
+  pivot_wider(
+    names_from = trial_type_clean,
+    values_from = mean_acc
+  ) %>%
+##label row for aggregated data
+  mutate(participant = "Across Subjects Summary")
+
+###combine subj and aggregated data
+final_table_data <- bind_rows(subject_wide, across_subjects_row)
+
+#create table using gt pkg
+final_table_data %>%
+  gt(rowname_col = "participant") %>%
+  
+#formate percents
+  fmt_percent(
+    columns = everything(),
+    decimals = 2
+  ) %>%
+  
+#style to differentiate aggregated data
+  tab_style(
+    style = list(
+      cell_fill(color = "#f7f7f7"),
+      cell_text(weight = "bold")
+    ),
+    locations = cells_body(
+      rows = (participant == "Across Subjects Summary")
+    )
+  ) %>%
+  tab_style(
+    style = cell_text(weight = "bold"),
+    locations = cells_stub(
+      rows = (participant == "Across Subjects Summary")
+    )
+  ) %>%
+  
+#border customization
+  tab_options(
+    table.border.top.color = "black",
+    table.border.bottom.color = "black",
+    column_labels.border.bottom.color = "black",
+    column_labels.font.weight = "bold",
+    stub.border.color = "gray80"
+  ) %>%
+  
+  # Context titles
+  tab_header(
+    title = md("Objective Measure: Probe Accuracy"),
+
+  )
+```
