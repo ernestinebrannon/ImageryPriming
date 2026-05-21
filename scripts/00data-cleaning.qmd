@@ -13,7 +13,7 @@ all_data <- list.files(here("data","raw-data", "BR"), pattern = "\\.csv$", full.
     read_csv(file) %>%
       filter(!is.na(label)) %>% #only real trials, no staircase trials
       select(label, visualCue, probe_loc, probe_response, subj_response, vivid_response, participant)%>% #selecting columns of interest
-      mutate(
+      mutate( #creates new columns
         source_file = basename(file),
         trial_type = case_when(
           str_detect(label, "Incongruent") ~ "incongruent", #Trials are congruent when the cue/imagined stimulus is the one the probe disappeared
@@ -96,8 +96,8 @@ $$ \%primed =\frac{ n_{RR}+ n_{GG} + 0.5*n_{RM}+0.5*n_{GM}}{n_{RR} + n_{GG} + 0.
 subj_priming_resp<- all_data %>% 
   group_by(participant) %>%
   count(mostlys_equal_all) %>% 
-  pivot_wider(names_from = mostlys_equal_all, values_from = n) %>% 
-  summarise( numberator = GG + RR)
+  pivot_wider(names_from = mostlys_equal_all, values_from = n, values_fill = 0) %>% 
+  summarise(subj_prime = ((GG + RR + (0.5*GM) + (0.5*RM)))/((GG + RR + (0.5*GM) + (0.5*RM)+RG+GR)))
   
   
 ```
@@ -117,6 +117,7 @@ accuracy_data<- all_data %>%
   pivot_wider(names_from = trial_type, values_from = accuracy) %>%
   mutate(
     congruence_effect = congruent - incongruent)
-
+#combining survey,accuracy,and subj priming score data
 between_subj<- inner_join(survey_data,accuracy_data,by = "participant")
+between_subj<- left_join(between_subj,subj_priming_resp, by = "participant")
 ```
