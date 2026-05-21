@@ -16,8 +16,8 @@ all_data <- list.files(here("data","raw-data", "BR"), pattern = "\\.csv$", full.
       mutate(
         source_file = basename(file),
         trial_type = case_when(
-          str_detect(label, "Incongruent") ~ "probe-cue-incongruent", #Trials are congruent when the cue/imagined stimulus is the one the probe disappeared
-          str_detect(label, "Congruent") ~ "probe-cue-congruent",
+          str_detect(label, "Incongruent") ~ "incongruent", #Trials are congruent when the cue/imagined stimulus is the one the probe disappeared
+          str_detect(label, "Congruent") ~ "congruent",
           TRUE ~ "control"),
         probe_color = case_when(
           str_detect(label, "RedProbe") ~ "red",
@@ -83,5 +83,5 @@ all_data<- inner_join(all_data,vviq_data, by = "participant")
 all_data$VVIQ<-as.numeric(all_data$VVIQ)
 all_data$VVIQ<-as.numeric(all_data$VVIQ2)
 
-write.csv(all_data,here("data","clean_data"))
+write.csv(all_data,here("data","clean_data.csv"))
 ```
