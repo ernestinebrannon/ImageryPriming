@@ -106,7 +106,7 @@ accuracy_plot <- ggplot(plot_data, aes(x = trial_type_clean, y = prop_correct)) 
     plot.subtitle = element_text(size = 15)
   )
 
-accuracy_plot
+ggsave(here("results","accuracy_plot.png"),accuracy_plot)
 ```
 
 
