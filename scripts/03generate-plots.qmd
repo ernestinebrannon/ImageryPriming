@@ -18,7 +18,7 @@ between_subj<-read_csv(here("data","between_subj.csv"),show_col_types = FALSE)
 ```{r}
 
 
-response_plot_data <- all_data %>%
+response_plot_data <- clean_data %>%
   mutate(
     subj_response_clean = factor(
       subj_response,
