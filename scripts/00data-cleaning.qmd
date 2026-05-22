@@ -112,7 +112,7 @@ subj_priming_resp<- left_join(subj_priming_resp,prime_scores_sub, by= "participa
 ```
 
 ```{r}
-## creates 
+## summarizing vividness and avg vviq data for each subj
 survey_data <- all_data %>%
   group_by(participant) %>% 
   summarise(
@@ -120,15 +120,19 @@ survey_data <- all_data %>%
     VVIQ2 = mean(VVIQ2, na.rm = TRUE),
     avg_vividness = mean(vivid_response, na.rm = TRUE), .groups = "drop")
 
+### calculates accuracy for each participant in the probe detection task for each trial type (whether the probe matched the cue location or not or whether it was a control trial)
 accuracy_data<- all_data %>% 
     group_by(participant, trial_type) %>%
   summarise(accuracy = mean(correct, na.rm = TRUE), .groups = "drop") %>%
   pivot_wider(names_from = trial_type, values_from = accuracy) %>%
   mutate(
     congruence_effect = congruent - incongruent)
+
+
 #combining survey,accuracy,and subj priming score data
 between_subj<- inner_join(survey_data,accuracy_data,by = "participant")
 between_subj<- left_join(between_subj,subj_priming_resp, by = "participant")
 
+#save this dataframe to a file a in our data folder
 write_csv(between_subj,here("data","between_subj.csv"))
 ```
