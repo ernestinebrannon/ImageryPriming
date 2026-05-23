@@ -31,7 +31,7 @@ descriptives_table<- matrix(
                                 c('vivid_response','VVIQ','VVIQ2','probe_accuracy')
                                 ))
 
-  
+  #why did it take soooo long to make a simple table!
 ```
 
 
