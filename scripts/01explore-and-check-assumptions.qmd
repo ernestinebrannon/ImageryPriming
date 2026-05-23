@@ -18,6 +18,23 @@ between_subj <- read_csv(here("data","between_subj.csv"), show_col_types = FALSE
 
 We'll want to create a table with some basic descriptive statics of things like mean and standard deviations of vividness reports, accuracy in probe task, VVIQ scores. You can ignore this for the moment if you'd like or feel free to give it a go. I'd recommend starting with creating the graphs that I've suggested below.
 
+```{r}
+descriptives<- all_data%>%
+  select(vivid_response,VVIQ,VVIQ2)%>%
+  mutate(probe_accuracy= ifelse(all_data$probe_loc == all_data$probe_response,1,0))
+
+descriptives_table<- matrix(
+  c(mean(descriptives$vivid_response),sd(descriptives$vivid_response),min(descriptives$vivid_response),max(descriptives$vivid_response),mean(descriptives$VVIQ),sd(descriptives$VVIQ),min(descriptives$VVIQ),max(descriptives$VVIQ),mean(descriptives$VVIQ2),sd(descriptives$VVIQ2),min(descriptives$VVIQ2),max(descriptives$VVIQ2),mean(descriptives$probe_accuracy),sd(descriptives$probe_accuracy),min(descriptives$probe_accuracy),max(descriptives$probe_accuracy)),
+                              nrow=4,
+                              ncol=4,,dimname=list(
+                                c('avg','sd','min','max'),
+                                c('vivid_response','VVIQ','VVIQ2','probe_accuracy')
+                                ))
+
+  
+```
+
+
 ## Univariate 
 
 Explore each variable on its own.
