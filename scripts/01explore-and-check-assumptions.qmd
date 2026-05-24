@@ -43,6 +43,88 @@ Explore each variable on its own.
 
 -   For across subjects use the all_data dataframe (trial-by-trial vividness, subjective responses). For between subjects use the between_subj dataframe (VVIQ scores, average vividness responses, congruence effect) . Use facet_wrap() to create separate plots for each participant.
 
+```{r}
+#across subjects VVIQ
+ggplot(all_data, aes(x=VVIQ))+
+  geom_histogram(color=9, binwidth = 8)
+```
+
+```{r}
+#across subjects VVIQ2
+ggplot(all_data, aes(x=VVIQ2))+
+  geom_histogram(color=9, binwidth = 13)
+```
+
+
+```{r}
+#across subjects subjective response
+ggplot(all_data, aes(x=subj_response))+
+  geom_bar(color=9)
+```
+
+
+```{r}
+#across subjects trial-by-trial vividness responses
+ggplot(all_data, aes(x=vivid_response))+
+  geom_histogram(color=9, binwidth =0.75)
+```
+
+```{r}
+#across subjects congruence effect (overall skew) (nc is outlier)
+ggplot(between_subj, aes(x=congruence_effect))+
+  geom_bar(color=9)
+```
+
+```{r}
+#across subjects subjective priming effect (so almost no priming even from subj reports)
+ggplot(between_subj, aes(x=subj_prime))+
+  geom_histogram(color=9, binwidth=0.02)
+```
+
+
+```{r}
+#individual participants VVIQ in graph format
+ggplot(between_subj, aes(x=VVIQ))+
+  geom_bar(color=9)+
+  facet_wrap('participant')
+```
+
+```{r}
+#individual participants VVIQ2 in graph format
+ggplot(between_subj, aes(x=VVIQ2))+
+  geom_bar(color=9)+
+  facet_wrap('participant')
+```
+
+```{r}
+#individual participants vividness range
+ggplot(all_data, aes(x=vivid_response))+
+  geom_bar(color=9)+
+  facet_wrap('participant')
+```
+
+```{r}
+#individual participants average vividness 
+ggplot(between_subj, aes(x=avg_vividness))+
+  geom_bar(color=9)+
+  facet_wrap('participant')
+```
+
+```{r}
+#individual participants congruence effect
+ggplot(between_subj, aes(x=congruence_effect))+
+  geom_bar(color=9)+
+  facet_wrap('participant')
+```
+
+```{r}
+#individual subjects subjective priming effect (gh seemed to have a strong subj priming effect)
+ggplot(between_subj, aes(x=subj_prime))+
+  geom_histogram(color=9, binwidth=0.02)+
+  facet_wrap('participant')
+```
+
+
 ## Bivariate
 
 -   Explore the relationship between two variables using scatter plots (geom_point)
