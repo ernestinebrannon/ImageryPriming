@@ -137,6 +137,47 @@ ggplot(between_subj, aes(x=subj_prime))+
 
     -   Objective Priming Score x Avg Vividness Response (see example graph below that does something similar with VVIQ)
 
+
+```{r}
+#average trial-by-trial vividness scores by VVIQ score
+ggplot(between_subj, aes(VVIQ,avg_vividness))+
+         geom_point()+
+  geom_smooth(method=lm, se=FALSE)
+```
+
+```{r}
+#average trial-by-trial vividness scores by VVIQ2 score
+ggplot(between_subj, aes(VVIQ2,avg_vividness))+
+         geom_point()+
+  geom_smooth(method=lm, se=FALSE)
+```
+
+```{r}
+#subj_priming scores by VVIQ score
+ggplot(between_subj, aes(VVIQ,subj_prime))+
+         geom_point()+
+  geom_smooth(method=lm, se=FALSE)
+```
+
+```{r}
+#subj_priming scores by VVIQ2 score
+ggplot(between_subj, aes(VVIQ2,subj_prime))+
+         geom_point()
+```
+
+```{r}
+#subj_priming scores by avg trial-by-trial vividness score
+ggplot(between_subj, aes(avg_vividness,subj_prime))+
+         geom_point()
+```
+
+```{r}
+#objective priming score by avg trial-by-trial vividness score
+ggplot(between_subj, aes(avg_vividness,congruence_effect))+
+         geom_point()
+```
+
+
 #### Objective Priming Score x VVIQ(2)
 
 For the probe detection task :$$ Congruence Effect = CongruentTrialAccuracy - IncongruentAccuracy $$
