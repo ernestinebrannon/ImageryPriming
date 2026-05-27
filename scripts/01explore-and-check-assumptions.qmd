@@ -191,7 +191,7 @@ ggplot(between_subj, aes(VVIQ2,congruence_effect))+
 #### Probe Accuracy
 
 ```{r}
-plot_data <- clean_data %>%
+plot_data <- all_data %>%
   mutate(
     trial_type_clean = case_when(
       trial_type == "control" ~ "Control",
