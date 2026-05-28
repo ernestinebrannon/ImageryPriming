@@ -148,8 +148,7 @@ ggplot(between_subj, aes(VVIQ,avg_vividness))+
 ```{r}
 #average trial-by-trial vividness scores by VVIQ2 score
 ggplot(between_subj, aes(VVIQ2,avg_vividness))+
-         geom_point()+
-  geom_smooth(method=lm, se=FALSE)
+         geom_point()
 ```
 
 ```{r}
@@ -184,8 +183,7 @@ For the probe detection task :$$ Congruence Effect = CongruentTrialAccuracy - In
 
 ```{r}
 ggplot(between_subj, aes(VVIQ2,congruence_effect))+
-  geom_point() + geom_hline(yintercept = 0)+ #adds horizontal line at 0
-  geom_segment(aes(xend = VVIQ2, yend = 0)) #adds line connecting to each point to 0
+  geom_point() 
 ```
 
 #### Probe Accuracy
