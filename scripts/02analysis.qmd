@@ -3,3 +3,37 @@ title: "02analysis"
 format: html
 ---
 
+```{r}
+#correlation between VVIQ2 and subj_priming 
+cor.test(between_subj$VVIQ2, between_subj$subj_prime)
+#p=0.6719
+```
+
+```{r}
+#correlation between VVIQ2 and avg vividness 
+cor.test(between_subj$VVIQ2, between_subj$avg_vividness)
+#p=0.01244
+```
+
+```{r}
+#correlation between VVIQ2 and obj_priming 
+cor.test(between_subj$VVIQ2, between_subj$congruence_effect)
+#p=0.9262
+```
+
+```{r}
+#correlation between subj_priming and avg vividness
+cor.test(between_subj$subj_prime, between_subj$avg_vividness)
+#p=0.4722
+```
+
+```{r}
+#correlation between obj_prime and avg vividness
+cor.test(between_subj$congruence_effect, between_subj$avg_vividness)
+#p=0.3997
+```
+
+
+
+
+
