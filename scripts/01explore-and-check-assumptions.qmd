@@ -104,6 +104,15 @@ ggplot(all_data, aes(x=vivid_response))+
 ```
 
 ```{r}
+#test test
+ggplot(all_data)+
+         geom_bar(aes(x=mostlys_equal_mixed))+ 
+  geom_bar(aes(x=mostlys_equal_all), position = position_dodge(width=1))+
+  facet_wrap('participant')
+```
+
+
+```{r}
 #individual participants average vividness 
 ggplot(between_subj, aes(x=avg_vividness))+
   geom_bar(color=9)+
@@ -160,8 +169,9 @@ ggplot(between_subj, aes(VVIQ,subj_prime))+
 
 ```{r}
 #subj_priming scores by VVIQ2 score
-ggplot(between_subj, aes(VVIQ2,subj_prime))+
-         geom_point()
+ggplot(between_subj, aes(VVIQ2))+
+         geom_point(aes(y=subj_prime_all, colour= 'red')) +
+  geom_point(aes(y=subj_primed_mix, colour= 'blue'))
 ```
 
 ```{r}

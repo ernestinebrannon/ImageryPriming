@@ -2,37 +2,69 @@
 title: "02analysis"
 format: html
 ---
+```{r}
+#correlation between subjective responses and objective accuracy
+Subj_obj <- cor.test(between_subj$subj_prime_all, between_subj$congruence_effect)
+
+```
+```{r}
+report::report(Subj_obj)
+```
 
 ```{r}
-#correlation between VVIQ2 and subj_priming 
-cor.test(between_subj$VVIQ2, between_subj$subj_prime)
+#correlation between VVIQ2 and subj_priming mostly=all
+VVIQ2_subj_prime_all <- cor.test(between_subj$VVIQ2, between_subj$subj_prime_all)
 #p=0.6719
+```
+```{r}
+report::report(VVIQ2_subj_prime)
+```
+```{r}
+#correlation between VVIQ2 and subj_priming mostly=mixed
+VVIQ2_subj_prime_mix <- cor.test(between_subj$VVIQ2, between_subj$subj_primed_mix)
+#p=0.6719
+```
+```{r}
+report::report(VVIQ2_subj_prime_mix)
 ```
 
 ```{r}
 #correlation between VVIQ2 and avg vividness 
-cor.test(between_subj$VVIQ2, between_subj$avg_vividness)
+VVIQ2_avg_vivid <- cor.test(between_subj$VVIQ2, between_subj$avg_vividness)
 #p=0.01244
 ```
+```{r}
+report::report(VVIQ2_avg_vivid)
+```
+
 
 ```{r}
 #correlation between VVIQ2 and obj_priming 
-cor.test(between_subj$VVIQ2, between_subj$congruence_effect)
+VVIQ2_congruence <- cor.test(between_subj$VVIQ2, between_subj$congruence_effect)
 #p=0.9262
+```
+```{r}
+report::report(VVIQ2_congruence)
 ```
 
 ```{r}
 #correlation between subj_priming and avg vividness
-cor.test(between_subj$subj_prime, between_subj$avg_vividness)
+subj_prime_avg_vivid <- cor.test(between_subj$subj_prime_all, between_subj$avg_vividness)
 #p=0.4722
+```
+```{r}
+report::report(subj_prime_avg_vivid)
 ```
 
 ```{r}
 #correlation between obj_prime and avg vividness
-cor.test(between_subj$congruence_effect, between_subj$avg_vividness)
+congruence_avg_vivid <- cor.test(between_subj$congruence_effect, between_subj$avg_vividness)
 #p=0.3997
 ```
 
+```{r}
+report::report(congruence_avg_vivid)
+```
 
 
 
