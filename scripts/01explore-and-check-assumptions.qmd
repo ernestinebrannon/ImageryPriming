@@ -104,6 +104,16 @@ ggplot(all_data, aes(x=vivid_response))+
 ```
 
 ```{r}
+#individual participants subjective responses
+all_data<-all_data %>%
+  mutate(subj_response = factor(subj_response, levels = c("allgreen","mostlygreen","evensplit","mostlyred","allred")))
+ggplot(all_data, aes(x=subj_response))+
+  geom_bar(color=9)+
+  facet_wrap('participant')
+```
+
+
+```{r}
 #test test
 ggplot(all_data)+
          geom_bar(aes(x=mostlys_equal_mixed))+ 
